@@ -7,7 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Gift, Sparkles, Coffee } from "lucide-react"
+import { Gift, Sparkles, Trophy, AlertCircle } from "lucide-react"
+import { useStatsigClient } from "@statsig/react-bindings"
+import Image from "next/image"
 
 type GiftCardChoice = "sephora" | "chipotle" | null
 
@@ -15,31 +17,81 @@ export default function ContestForm() {
   const [selectedGiftCard, setSelectedGiftCard] = useState<GiftCardChoice>(null)
   const [venmoUsername, setVenmoUsername] = useState("")
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [duplicateError, setDuplicateError] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const statsigClient = useStatsigClient()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (selectedGiftCard && venmoUsername.trim()) {
-      // Here you would typically send the data to your backend
-      console.log("Contest entry:", {
-        giftCardChoice: selectedGiftCard,
-        venmoUsername: venmoUsername.trim(),
-      })
-      setIsSubmitted(true)
+      setIsSubmitting(true)
+      setDuplicateError("")
+
+      try {
+        const checkResponse = await fetch("/api/check-entry", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            venmoUsername: venmoUsername.trim(),
+            action: "submit",
+          }),
+        })
+
+        const checkResult = await checkResponse.json()
+
+        if (!checkResponse.ok) {
+          if (checkResponse.status === 409) {
+            setDuplicateError(checkResult.error)
+            setIsSubmitting(false)
+            return
+          }
+          throw new Error(checkResult.error || "Failed to submit entry")
+        }
+
+        statsigClient.logEvent("contest_entry", selectedGiftCard, {
+          venmo_username: venmoUsername.trim(),
+          gift_card_choice: selectedGiftCard,
+          timestamp: new Date().toISOString(),
+          user_agent: navigator.userAgent,
+        })
+
+        setIsSubmitted(true)
+      } catch (error) {
+        console.error("Error submitting entry:", error)
+        setDuplicateError("An error occurred while submitting your entry. Please try again.")
+      } finally {
+        setIsSubmitting(false)
+      }
+    }
+  }
+
+  const handleVenmoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setVenmoUsername(e.target.value)
+    if (duplicateError) {
+      setDuplicateError("")
     }
   }
 
   if (isSubmitted) {
     return (
       <div className="container mx-auto px-4 py-16 max-w-2xl">
-        <Card className="text-center">
-          <CardHeader>
-            <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-              <Gift className="w-8 h-8 text-primary" />
+        <Card className="text-center border-2 border-primary/20 shadow-2xl bg-card/80 backdrop-blur-sm">
+          <CardHeader className="pb-8">
+            <div className="mx-auto w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6 pulse-glow">
+              <Trophy className="w-10 h-10 text-primary" />
             </div>
-            <CardTitle className="text-2xl text-balance">Thank You for Participating!</CardTitle>
-            <CardDescription className="text-lg">
-              Your entry has been submitted successfully. We'll contact you via Venmo if you win!
+            <CardTitle className="text-3xl text-balance bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              🎉 You're In! 🎉
+            </CardTitle>
+            <CardDescription className="text-lg mt-4 text-card-foreground">
+              Your entry has been submitted successfully! We'll contact you via Venmo if you're our lucky winner.
             </CardDescription>
+            <div className="mt-6 p-4 bg-muted rounded-lg">
+              <p className="text-sm text-muted-foreground">
+                <Sparkles className="w-4 h-4 inline mr-2" />
+                Thank you for helping with our research study!
+              </p>
+            </div>
           </CardHeader>
         </Card>
       </div>
@@ -47,122 +99,134 @@ export default function ContestForm() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      {/* Header Section */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-balance mb-4">Your Gift Card Preference Matters!</h1>
-        <p className="text-xl text-muted-foreground text-pretty max-w-2xl mx-auto">
-          Help us with our research study by choosing your preferred gift card. Enter to win a $50 gift card to your
-          choice!
+    <div className="container mx-auto px-4 py-12 max-w-6xl">
+      <div className="text-center mb-16">
+        <div className="inline-flex items-center gap-2 bg-white text-primary border border-primary/20 px-4 py-2 rounded-full text-sm font-medium mb-6 shadow-sm">
+          <Gift className="w-4 h-4" />
+          Research Study Contest
+        </div>
+        <h1 className="text-5xl md:text-6xl font-bold text-balance mb-6 bg-gradient-to-r from-foreground via-primary to-secondary bg-clip-text text-transparent leading-tight">
+          Win a $50 Gift Card!
+        </h1>
+        <p className="text-xl text-muted-foreground text-pretty max-w-3xl mx-auto leading-relaxed">
+          Help us understand consumer preferences by choosing your favorite gift card. Your participation makes a
+          difference in our research!
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Gift Card Choice Section */}
-        <div className="space-y-6">
-          <h2 className="text-2xl font-semibold text-center">Choose Your Preferred Gift Card</h2>
+      <form onSubmit={handleSubmit} className="space-y-12">
+        <div className="space-y-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold mb-4">Choose Your Preferred Gift Card</h2>
+            <p className="text-muted-foreground">Select the gift card you'd prefer to win</p>
+          </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Sephora Card */}
-            <Card
-              className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                selectedGiftCard === "sephora" ? "ring-2 ring-primary bg-primary/5" : "hover:bg-card/80"
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            <div
+              className={`cursor-pointer card-hover-effect overflow-hidden rounded-lg transition-all duration-300 ${
+                selectedGiftCard === "sephora"
+                  ? "ring-4 ring-primary shadow-2xl pulse-glow"
+                  : "hover:shadow-xl shadow-lg"
               }`}
               onClick={() => setSelectedGiftCard("sephora")}
             >
-              <CardHeader className="text-center">
-                <div className="mx-auto w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mb-4">
-                  <Sparkles className="w-8 h-8 text-pink-600" />
-                </div>
-                <CardTitle className="text-xl">Sephora Gift Card</CardTitle>
-                <CardDescription>
-                  Perfect for beauty enthusiasts! Shop makeup, skincare, and fragrance from top brands.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button
-                  type="button"
-                  variant={selectedGiftCard === "sephora" ? "default" : "outline"}
-                  className="w-full"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setSelectedGiftCard("sephora")
-                  }}
-                >
-                  {selectedGiftCard === "sephora" ? "Selected!" : "Choose Sephora"}
-                </Button>
-              </CardContent>
-            </Card>
+              <div className="relative aspect-[1.586/1] bg-gradient-to-br from-black via-gray-900 to-black shadow-xl">
+                <Image
+                  src="/images/sephora-card.png"
+                  alt="Sephora Gift Card"
+                  fill
+                  className="object-cover object-center scale-110"
+                />
+                {selectedGiftCard === "sephora" && (
+                  <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                    <div className="bg-white/95 text-primary px-6 py-3 rounded-full font-bold text-lg shadow-lg">
+                      ✓ SELECTED
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
 
-            {/* Chipotle Card */}
-            <Card
-              className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                selectedGiftCard === "chipotle" ? "ring-2 ring-primary bg-primary/5" : "hover:bg-card/80"
+            <div
+              className={`cursor-pointer card-hover-effect overflow-hidden rounded-lg transition-all duration-300 ${
+                selectedGiftCard === "chipotle"
+                  ? "ring-4 ring-primary shadow-2xl pulse-glow"
+                  : "hover:shadow-xl shadow-lg"
               }`}
               onClick={() => setSelectedGiftCard("chipotle")}
             >
-              <CardHeader className="text-center">
-                <div className="mx-auto w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-4">
-                  <Coffee className="w-8 h-8 text-orange-600" />
-                </div>
-                <CardTitle className="text-xl">Chipotle Gift Card</CardTitle>
-                <CardDescription>
-                  For food lovers! Enjoy fresh, customizable Mexican-inspired meals and bowls.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button
-                  type="button"
-                  variant={selectedGiftCard === "chipotle" ? "default" : "outline"}
-                  className="w-full"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setSelectedGiftCard("chipotle")
-                  }}
-                >
-                  {selectedGiftCard === "chipotle" ? "Selected!" : "Choose Chipotle"}
-                </Button>
-              </CardContent>
-            </Card>
+              <div className="relative aspect-[1.586/1] bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 shadow-xl">
+                <Image
+                  src="/images/chipotle-card.png"
+                  alt="Chipotle Gift Card"
+                  fill
+                  className="object-cover object-center scale-110"
+                />
+                {selectedGiftCard === "chipotle" && (
+                  <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                    <div className="bg-white/95 text-primary px-6 py-3 rounded-full font-bold text-lg shadow-lg">
+                      ✓ SELECTED
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Venmo Entry Section */}
         {selectedGiftCard && (
-          <Card className="max-w-md mx-auto">
-            <CardHeader>
-              <CardTitle className="text-center">Enter to Win!</CardTitle>
-              <CardDescription className="text-center">
-                Provide your Venmo username to complete your entry
-              </CardDescription>
+          <Card className="max-w-lg mx-auto border-2 border-primary/20 shadow-xl bg-card/80 backdrop-blur-sm">
+            <CardHeader className="text-center pb-6">
+              <CardTitle className="text-2xl flex items-center justify-center gap-2">
+                <Sparkles className="w-6 h-6 text-primary" />
+                Complete Your Entry
+              </CardTitle>
+              <CardDescription className="text-base">Just one more step to enter the contest!</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="venmo">Venmo Username</Label>
+            <CardContent className="space-y-6">
+              <div className="space-y-3">
+                <Label htmlFor="venmo" className="text-base font-medium">
+                  Venmo Username
+                </Label>
                 <Input
                   id="venmo"
                   type="text"
                   placeholder="@your-venmo-username"
                   value={venmoUsername}
-                  onChange={(e) => setVenmoUsername(e.target.value)}
+                  onChange={handleVenmoChange}
                   required
+                  className="h-12 text-base"
                 />
+                <p className="text-sm text-muted-foreground">We'll use this to send your prize if you win!</p>
+                {duplicateError && (
+                  <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                    <AlertCircle className="w-4 h-4 text-destructive flex-shrink-0" />
+                    <p className="text-sm text-destructive">{duplicateError}</p>
+                  </div>
+                )}
               </div>
-              <Button type="submit" className="w-full" disabled={!selectedGiftCard || !venmoUsername.trim()}>
-                Submit Entry
+              <Button
+                type="submit"
+                className="w-full h-12 text-base font-semibold"
+                disabled={!selectedGiftCard || !venmoUsername.trim() || isSubmitting}
+              >
+                {isSubmitting ? "Submitting..." : "🎯 Submit My Entry"}
               </Button>
             </CardContent>
           </Card>
         )}
       </form>
 
-      {/* Footer Section */}
-      <footer className="mt-16 text-center text-sm text-muted-foreground space-y-2">
-        <p>
-          This contest is for research purposes. Your data will be kept confidential and used only for academic
-          research.
-        </p>
-        <p>By participating, you agree to our terms and conditions. Winner will be selected randomly.</p>
+      <footer className="mt-20 text-center space-y-4">
+        <div className="max-w-2xl mx-auto p-6 bg-muted/50 rounded-xl border border-border/50">
+          <p className="text-sm text-muted-foreground mb-2">
+            🔒 This contest is for academic research purposes. Your data will be kept confidential and used only for
+            research.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            By participating, you agree to our terms. Winner will be selected randomly and notified within 48 hours.
+          </p>
+        </div>
       </footer>
     </div>
   )
