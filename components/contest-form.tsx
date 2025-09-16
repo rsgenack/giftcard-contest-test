@@ -32,6 +32,8 @@ export default function ContestForm() {
       try {
         const normalizedUsername = normalizeVenmoUsername(venmoUsername)
 
+        statsigClient.logEvent("venmo_provided", normalizedUsername)
+
         statsigClient.logEvent("contest_entry", selectedGiftCard, {
           venmo_username: normalizedUsername,
           gift_card_choice: selectedGiftCard,
@@ -52,38 +54,14 @@ export default function ContestForm() {
     setSelectedGiftCard(cardType)
 
     if (cardType && statsigClient) {
-      const normalizedUsername = venmoUsername.trim() ? normalizeVenmoUsername(venmoUsername) : null
-
-      statsigClient.logEvent(
-        "card_selection",
-        cardType,
-        {
-          timestamp: new Date().toISOString(),
-        },
-        {
-          venmo_username: normalizedUsername,
-        },
-      )
+      statsigClient.logEvent("card_selection", cardType, {
+        timestamp: new Date().toISOString(),
+      })
     }
   }
 
   const handleVenmoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setVenmoUsername(e.target.value)
-
-    if (selectedGiftCard && statsigClient && e.target.value.trim()) {
-      const normalizedUsername = normalizeVenmoUsername(e.target.value)
-
-      statsigClient.logEvent(
-        "card_selection",
-        selectedGiftCard,
-        {
-          timestamp: new Date().toISOString(),
-        },
-        {
-          venmo_username: normalizedUsername,
-        },
-      )
-    }
   }
 
   if (isSubmitted) {
