@@ -34,7 +34,7 @@ export default function ContestForm() {
 
         statsigClient.logEvent("venmo_provided", normalizedUsername)
 
-        statsigClient.logEvent("contest_entry", selectedGiftCard, {
+        statsigClient.logEvent("contest_entry", 1, {
           venmo_username: normalizedUsername,
           gift_card_choice: selectedGiftCard,
           timestamp: new Date().toISOString(),
