@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Gift, Sparkles, Trophy, AlertCircle } from "lucide-react"
+import { Gift, Sparkles, Trophy } from "lucide-react"
 import { useStatsigClient } from "@statsig/react-bindings"
 import Image from "next/image"
 
@@ -17,7 +17,6 @@ export default function ContestForm() {
   const [selectedGiftCard, setSelectedGiftCard] = useState<GiftCardChoice>(null)
   const [venmoUsername, setVenmoUsername] = useState("")
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const [duplicateError, setDuplicateError] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const statsigClient = useStatsigClient()
 
@@ -25,29 +24,8 @@ export default function ContestForm() {
     e.preventDefault()
     if (selectedGiftCard && venmoUsername.trim()) {
       setIsSubmitting(true)
-      setDuplicateError("")
 
       try {
-        const checkResponse = await fetch("/api/check-entry", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            venmoUsername: venmoUsername.trim(),
-            action: "submit",
-          }),
-        })
-
-        const checkResult = await checkResponse.json()
-
-        if (!checkResponse.ok) {
-          if (checkResponse.status === 409) {
-            setDuplicateError(checkResult.error)
-            setIsSubmitting(false)
-            return
-          }
-          throw new Error(checkResult.error || "Failed to submit entry")
-        }
-
         statsigClient.logEvent("contest_entry", selectedGiftCard, {
           venmo_username: venmoUsername.trim(),
           gift_card_choice: selectedGiftCard,
@@ -58,17 +36,31 @@ export default function ContestForm() {
         setIsSubmitted(true)
       } catch (error) {
         console.error("Error submitting entry:", error)
-        setDuplicateError("An error occurred while submitting your entry. Please try again.")
       } finally {
         setIsSubmitting(false)
       }
     }
   }
 
+  const handleCardSelection = (cardType: GiftCardChoice) => {
+    setSelectedGiftCard(cardType)
+
+    if (cardType && statsigClient) {
+      statsigClient.logEvent("card_selection", cardType, {
+        venmo_username: venmoUsername.trim() || null,
+        timestamp: new Date().toISOString(),
+      })
+    }
+  }
+
   const handleVenmoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setVenmoUsername(e.target.value)
-    if (duplicateError) {
-      setDuplicateError("")
+
+    if (selectedGiftCard && statsigClient && e.target.value.trim()) {
+      statsigClient.logEvent("card_selection", selectedGiftCard, {
+        venmo_username: e.target.value.trim(),
+        timestamp: new Date().toISOString(),
+      })
     }
   }
 
@@ -128,7 +120,7 @@ export default function ContestForm() {
                   ? "ring-4 ring-primary shadow-2xl pulse-glow"
                   : "hover:shadow-xl shadow-lg"
               }`}
-              onClick={() => setSelectedGiftCard("sephora")}
+              onClick={() => handleCardSelection("sephora")}
             >
               <div className="relative aspect-[1.586/1] bg-gradient-to-br from-black via-gray-900 to-black shadow-xl">
                 <Image
@@ -153,7 +145,7 @@ export default function ContestForm() {
                   ? "ring-4 ring-primary shadow-2xl pulse-glow"
                   : "hover:shadow-xl shadow-lg"
               }`}
-              onClick={() => setSelectedGiftCard("chipotle")}
+              onClick={() => handleCardSelection("chipotle")}
             >
               <div className="relative aspect-[1.586/1] bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 shadow-xl">
                 <Image
@@ -198,12 +190,6 @@ export default function ContestForm() {
                   className="h-12 text-base"
                 />
                 <p className="text-sm text-muted-foreground">We'll use this to send your prize if you win!</p>
-                {duplicateError && (
-                  <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-                    <AlertCircle className="w-4 h-4 text-destructive flex-shrink-0" />
-                    <p className="text-sm text-destructive">{duplicateError}</p>
-                  </div>
-                )}
               </div>
               <Button
                 type="submit"
