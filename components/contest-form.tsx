@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -18,7 +18,12 @@ export default function ContestForm() {
   const [venmoUsername, setVenmoUsername] = useState("")
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [duplicateError, setDuplicateError] = useState("")
   const statsigClient = useStatsigClient()
+
+  useEffect(() => {
+    // No need to load existing submissions from localStorage
+  }, [])
 
   const normalizeVenmoUsername = (username: string): string => {
     return username.trim().replace(/^@/, "")
@@ -28,10 +33,46 @@ export default function ContestForm() {
     e.preventDefault()
     if (selectedGiftCard && venmoUsername.trim()) {
       setIsSubmitting(true)
+      setDuplicateError("")
 
       try {
         const normalizedUsername = normalizeVenmoUsername(venmoUsername)
 
+        const duplicateResponse = await fetch("/api/check-duplicate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ venmoUsername: normalizedUsername }),
+        })
+
+        if (!duplicateResponse.ok) {
+          throw new Error("Failed to check for duplicates")
+        }
+
+        const duplicateData = await duplicateResponse.json()
+
+        if (duplicateData.isDuplicate) {
+          setDuplicateError("This Venmo username has already been submitted. Each person can only enter once.")
+          return
+        }
+
+        const submitResponse = await fetch("/api/submit-entry", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            giftCardChoice: selectedGiftCard,
+            venmoUsername: normalizedUsername,
+          }),
+        })
+
+        if (!submitResponse.ok) {
+          throw new Error("Failed to submit entry")
+        }
+
+        // Log events to StatSig
         statsigClient.logEvent("venmo_provided", normalizedUsername)
 
         statsigClient.logEvent("contest_entry", 1, {
@@ -44,6 +85,7 @@ export default function ContestForm() {
         setIsSubmitted(true)
       } catch (error) {
         console.error("Error submitting entry:", error)
+        setDuplicateError("An error occurred while submitting your entry. Please try again.")
       } finally {
         setIsSubmitting(false)
       }
@@ -190,6 +232,11 @@ export default function ContestForm() {
                   className="h-12 text-base"
                 />
                 <p className="text-sm text-muted-foreground">We'll use this to send your prize if you win!</p>
+                {duplicateError && (
+                  <p className="text-sm text-destructive bg-destructive/10 p-3 rounded-md border border-destructive/20">
+                    {duplicateError}
+                  </p>
+                )}
               </div>
               <Button
                 type="submit"
