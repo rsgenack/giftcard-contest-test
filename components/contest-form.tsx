@@ -46,10 +46,16 @@ export default function ContestForm() {
     setSelectedGiftCard(cardType)
 
     if (cardType && statsigClient) {
-      statsigClient.logEvent("card_selection", cardType, {
-        venmo_username: venmoUsername.trim() || null,
-        timestamp: new Date().toISOString(),
-      })
+      statsigClient.logEvent(
+        "card_selection",
+        cardType,
+        {
+          timestamp: new Date().toISOString(),
+        },
+        {
+          venmo_username: venmoUsername.trim() || null,
+        },
+      )
     }
   }
 
@@ -57,10 +63,16 @@ export default function ContestForm() {
     setVenmoUsername(e.target.value)
 
     if (selectedGiftCard && statsigClient && e.target.value.trim()) {
-      statsigClient.logEvent("card_selection", selectedGiftCard, {
-        venmo_username: e.target.value.trim(),
-        timestamp: new Date().toISOString(),
-      })
+      statsigClient.logEvent(
+        "card_selection",
+        selectedGiftCard,
+        {
+          timestamp: new Date().toISOString(),
+        },
+        {
+          venmo_username: e.target.value.trim(),
+        },
+      )
     }
   }
 
