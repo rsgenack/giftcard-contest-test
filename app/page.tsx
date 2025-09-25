@@ -5,22 +5,26 @@ import { useEffect } from "react";
 import ContestForm from "@/components/contest-form";
 import { STATSIG_CLIENT_KEY } from "@/constants/apiKeys";
 import { getStableUserID } from "@/utils/getStableUserID";
+import { trackGAEvent } from "@/lib/ga";
 
 function PageWithStatsig() {
-  const { isLoading, error } = useClientAsyncInit(STATSIG_CLIENT_KEY, {
+  const { isLoading } = useClientAsyncInit(STATSIG_CLIENT_KEY, {
     userID: getStableUserID(),
   });
   const statsig = useStatsigClient();
 
   useEffect(() => {
-    if (!isLoading && !error && statsig) {
+    if (!isLoading && statsig) {
       statsig.logEvent("page_loaded", 1, {
         path: typeof window !== "undefined" ? window.location.pathname : "/",
       });
+      trackGAEvent("page_loaded", {
+        path: typeof window !== "undefined" ? window.location.pathname : "/",
+      });
     }
-  }, [isLoading, error, statsig]);
+  }, [isLoading, statsig]);
 
-  if (isLoading || error) return null;
+  if (isLoading) return null;
 
   return (
     <main className="p-6">

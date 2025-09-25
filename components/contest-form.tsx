@@ -1,106 +1,115 @@
-"use client"
+'use client';
 
-import type React from "react"
+import type React from 'react';
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Gift, Sparkles, Trophy } from "lucide-react"
-import { useStatsigClient } from "@statsig/react-bindings"
-import Image from "next/image"
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useStatsigClient } from '@statsig/react-bindings';
+import { Gift, Sparkles, Trophy } from 'lucide-react';
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
+import { trackGAEvent } from '@/lib/ga';
 
-type GiftCardChoice = "sephora" | "chipotle" | null
+type GiftCardChoice = 'sephora' | 'chipotle' | null;
 
 export default function ContestForm() {
-  const [selectedGiftCard, setSelectedGiftCard] = useState<GiftCardChoice>(null)
-  const [venmoUsername, setVenmoUsername] = useState("")
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [duplicateError, setDuplicateError] = useState("")
-  const statsigClient = useStatsigClient()
+  const [selectedGiftCard, setSelectedGiftCard] = useState<GiftCardChoice>(null);
+  const [venmoUsername, setVenmoUsername] = useState('');
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [duplicateError, setDuplicateError] = useState('');
+  const statsigClient = useStatsigClient();
 
   useEffect(() => {
     // No need to load existing submissions from localStorage
-  }, [])
+  }, []);
 
   const normalizeVenmoUsername = (username: string): string => {
-    return username.trim().replace(/^@/, "")
-  }
+    return username.trim().replace(/^@/, '');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (selectedGiftCard && venmoUsername.trim()) {
-      setIsSubmitting(true)
-      setDuplicateError("")
+      setIsSubmitting(true);
+      setDuplicateError('');
 
       try {
-        const normalizedUsername = normalizeVenmoUsername(venmoUsername)
+        const normalizedUsername = normalizeVenmoUsername(venmoUsername);
 
-        const duplicateResponse = await fetch("/api/check-duplicate", {
-          method: "POST",
+        const duplicateResponse = await fetch('/api/check-duplicate', {
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({ venmoUsername: normalizedUsername }),
-        })
+        });
 
         if (!duplicateResponse.ok) {
-          throw new Error("Failed to check for duplicates")
+          throw new Error('Failed to check for duplicates');
         }
 
-        const duplicateData = await duplicateResponse.json()
+        const duplicateData = await duplicateResponse.json();
 
         if (duplicateData.isDuplicate) {
-          setDuplicateError("This Venmo username has already been submitted. Each person can only enter once.")
-          return
+          setDuplicateError(
+            'This Venmo username has already been submitted. Each person can only enter once.',
+          );
+          return;
         }
 
-        const submitResponse = await fetch("/api/submit-entry", {
-          method: "POST",
+        const submitResponse = await fetch('/api/submit-entry', {
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             giftCardChoice: selectedGiftCard,
             venmoUsername: normalizedUsername,
           }),
-        })
+        });
 
         if (!submitResponse.ok) {
-          throw new Error("Failed to submit entry")
+          throw new Error('Failed to submit entry');
         }
 
         // Log events to StatSig (sanitized, no PII)
-        statsigClient.logEvent("venmo_provided", 1, { provided: true })
+        statsigClient.logEvent('venmo_provided', 1, { provided: true });
+        trackGAEvent('venmo_provided', { provided: true });
 
-        statsigClient.logEvent("contest_entry", 1, {
+        statsigClient.logEvent('contest_entry', 1, {
           gift_card_choice: selectedGiftCard,
           submitted: true,
-        })
+        });
+        trackGAEvent('contest_entry', {
+          gift_card_choice: selectedGiftCard || undefined,
+          submitted: true,
+        });
 
-        setIsSubmitted(true)
+        setIsSubmitted(true);
       } catch (error) {
-        console.error("Error submitting entry:", error)
-        setDuplicateError("An error occurred while submitting your entry. Please try again.")
+        console.error('Error submitting entry:', error);
+        setDuplicateError('An error occurred while submitting your entry. Please try again.');
       } finally {
-        setIsSubmitting(false)
+        setIsSubmitting(false);
       }
     }
-  }
+  };
 
   const handleCardSelection = (cardType: GiftCardChoice) => {
-    setSelectedGiftCard(cardType)
+    setSelectedGiftCard(cardType);
 
     if (cardType && statsigClient) {
-      statsigClient.logEvent("gift_card_selected", 1, { gift_card_choice: cardType })
+      statsigClient.logEvent('gift_card_selected', 1, { gift_card_choice: cardType });
+      trackGAEvent('gift_card_selected', { gift_card_choice: cardType });
     }
-  }
+  };
 
   const handleVenmoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setVenmoUsername(e.target.value)
-  }
+    setVenmoUsername(e.target.value);
+  };
 
   if (isSubmitted) {
     return (
@@ -114,7 +123,8 @@ export default function ContestForm() {
               🎉 You're In! 🎉
             </CardTitle>
             <CardDescription className="text-lg mt-4 text-card-foreground">
-              Your entry has been submitted successfully! We'll contact you via Venmo if you're our lucky winner.
+              Your entry has been submitted successfully! We'll contact you via Venmo if you're our
+              lucky winner.
             </CardDescription>
             <div className="mt-6 p-4 bg-muted rounded-lg">
               <p className="text-sm text-muted-foreground">
@@ -125,7 +135,7 @@ export default function ContestForm() {
           </CardHeader>
         </Card>
       </div>
-    )
+    );
   }
 
   return (
@@ -139,8 +149,8 @@ export default function ContestForm() {
           Win a $50 Gift Card!
         </h1>
         <p className="text-xl text-muted-foreground text-pretty max-w-3xl mx-auto leading-relaxed">
-          Help us understand consumer preferences by choosing your favorite gift card. Your participation makes a
-          difference in our research!
+          Help us understand consumer preferences by choosing your favorite gift card. Your
+          participation makes a difference in our research!
         </p>
       </div>
 
@@ -154,11 +164,11 @@ export default function ContestForm() {
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             <div
               className={`cursor-pointer card-hover-effect overflow-hidden rounded-lg transition-all duration-300 ${
-                selectedGiftCard === "sephora"
-                  ? "ring-4 ring-primary shadow-2xl pulse-glow"
-                  : "hover:shadow-xl shadow-lg"
+                selectedGiftCard === 'sephora'
+                  ? 'ring-4 ring-primary shadow-2xl pulse-glow'
+                  : 'hover:shadow-xl shadow-lg'
               }`}
-              onClick={() => handleCardSelection("sephora")}
+              onClick={() => handleCardSelection('sephora')}
             >
               <div className="relative aspect-[1.586/1] bg-gradient-to-br from-black via-gray-900 to-black shadow-xl">
                 <Image
@@ -167,7 +177,7 @@ export default function ContestForm() {
                   fill
                   className="object-cover object-center scale-110"
                 />
-                {selectedGiftCard === "sephora" && (
+                {selectedGiftCard === 'sephora' && (
                   <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
                     <div className="bg-white/95 text-primary px-6 py-3 rounded-full font-bold text-lg shadow-lg">
                       ✓ SELECTED
@@ -179,11 +189,11 @@ export default function ContestForm() {
 
             <div
               className={`cursor-pointer card-hover-effect overflow-hidden rounded-lg transition-all duration-300 ${
-                selectedGiftCard === "chipotle"
-                  ? "ring-4 ring-primary shadow-2xl pulse-glow"
-                  : "hover:shadow-xl shadow-lg"
+                selectedGiftCard === 'chipotle'
+                  ? 'ring-4 ring-primary shadow-2xl pulse-glow'
+                  : 'hover:shadow-xl shadow-lg'
               }`}
-              onClick={() => handleCardSelection("chipotle")}
+              onClick={() => handleCardSelection('chipotle')}
             >
               <div className="relative aspect-[1.586/1] bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 shadow-xl">
                 <Image
@@ -192,7 +202,7 @@ export default function ContestForm() {
                   fill
                   className="object-cover object-center scale-110"
                 />
-                {selectedGiftCard === "chipotle" && (
+                {selectedGiftCard === 'chipotle' && (
                   <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
                     <div className="bg-white/95 text-primary px-6 py-3 rounded-full font-bold text-lg shadow-lg">
                       ✓ SELECTED
@@ -211,7 +221,9 @@ export default function ContestForm() {
                 <Sparkles className="w-6 h-6 text-primary" />
                 Complete Your Entry
               </CardTitle>
-              <CardDescription className="text-base">Just one more step to enter the contest!</CardDescription>
+              <CardDescription className="text-base">
+                Just one more step to enter the contest!
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-3">
@@ -227,7 +239,9 @@ export default function ContestForm() {
                   required
                   className="h-12 text-base"
                 />
-                <p className="text-sm text-muted-foreground">We'll use this to send your prize if you win!</p>
+                <p className="text-sm text-muted-foreground">
+                  We'll use this to send your prize if you win!
+                </p>
                 {duplicateError && (
                   <p className="text-sm text-destructive bg-destructive/10 p-3 rounded-md border border-destructive/20">
                     {duplicateError}
@@ -239,7 +253,7 @@ export default function ContestForm() {
                 className="w-full h-12 text-base font-semibold"
                 disabled={!selectedGiftCard || !venmoUsername.trim() || isSubmitting}
               >
-                {isSubmitting ? "Submitting..." : "🎯 Submit My Entry"}
+                {isSubmitting ? 'Submitting...' : '🎯 Submit My Entry'}
               </Button>
             </CardContent>
           </Card>
@@ -249,14 +263,15 @@ export default function ContestForm() {
       <footer className="mt-20 text-center space-y-4">
         <div className="max-w-2xl mx-auto p-6 bg-muted/50 rounded-xl border border-border/50">
           <p className="text-sm text-muted-foreground mb-2">
-            🔒 This contest is for academic research purposes. Your data will be kept confidential and used only for
-            research.
+            🔒 This contest is for academic research purposes. Your data will be kept confidential
+            and used only for research.
           </p>
           <p className="text-sm text-muted-foreground">
-            By participating, you agree to our terms. Winner will be selected randomly and notified within 48 hours.
+            By participating, you agree to our terms. Winner will be selected randomly and notified
+            within 48 hours.
           </p>
         </div>
       </footer>
     </div>
-  )
+  );
 }
