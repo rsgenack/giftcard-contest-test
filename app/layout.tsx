@@ -11,9 +11,15 @@ const anton = Anton({ subsets: ['latin'], weight: '400', variable: '--font-anton
 const poppins = Poppins({ subsets: ['latin'], weight: ['400', '500', '600'], variable: '--font-poppins' });
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
+  title: 'Giftcard Contest Experiment',
+  description: 'Win a $20 giftcard by filling out this 3 second form to help me with an experiment',
   generator: 'v0.app',
+  openGraph: {
+    title: 'Giftcard Contest Experiment',
+    description: 'Win a $20 giftcard by filling out this 3 second form to help me with an experiment',
+    type: 'website',
+    siteName: 'Giftcard Contest Experiment',
+  },
 };
 
 export default function RootLayout({

@@ -6,11 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { trackGAEvent } from '@/lib/ga';
+import { createStatsigLogger } from '@/lib/statsig-debug';
 import { useStatsigClient } from '@statsig/react-bindings';
 import { Gift, Sparkles, Trophy } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import { trackGAEvent } from '@/lib/ga';
 
 type GiftCardChoice = 'sephora' | 'chipotle' | null;
 
@@ -21,6 +22,7 @@ export default function ContestForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [duplicateError, setDuplicateError] = useState('');
   const statsigClient = useStatsigClient();
+  const statsigLogger = createStatsigLogger(statsigClient);
 
   useEffect(() => {
     // No need to load existing submissions from localStorage
@@ -76,10 +78,10 @@ export default function ContestForm() {
         }
 
         // Log events to StatSig (sanitized, no PII)
-        statsigClient.logEvent('venmo_provided', 1, { provided: true });
+        statsigLogger.logEvent('venmo_provided', 1, { provided: true });
         trackGAEvent('venmo_provided', { provided: true });
 
-        statsigClient.logEvent('contest_entry', 1, {
+        statsigLogger.logEvent('contest_entry', 1, {
           gift_card_choice: selectedGiftCard,
           submitted: true,
         });
@@ -101,8 +103,8 @@ export default function ContestForm() {
   const handleCardSelection = (cardType: GiftCardChoice) => {
     setSelectedGiftCard(cardType);
 
-    if (cardType && statsigClient) {
-      statsigClient.logEvent('gift_card_selected', 1, { gift_card_choice: cardType });
+    if (cardType) {
+      statsigLogger.logEvent('gift_card_selected', 1, { gift_card_choice: cardType });
       trackGAEvent('gift_card_selected', { gift_card_choice: cardType });
     }
   };
@@ -119,9 +121,7 @@ export default function ContestForm() {
             <div className="mx-auto w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6 pulse-glow">
               <Trophy className="w-10 h-10 text-primary" />
             </div>
-            <CardTitle className="text-3xl text-balance bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              🎉 You're In! 🎉
-            </CardTitle>
+            <CardTitle className="text-3xl text-balance text-primary">🎉 You're In! 🎉</CardTitle>
             <CardDescription className="text-lg mt-4 text-card-foreground">
               Your entry has been submitted successfully! We'll contact you via Venmo if you're our
               lucky winner.
@@ -145,8 +145,8 @@ export default function ContestForm() {
           <Gift className="w-4 h-4" />
           Research Study Contest
         </div>
-        <h1 className="text-5xl md:text-6xl font-bold text-balance mb-6 bg-gradient-to-r from-foreground via-primary to-secondary bg-clip-text text-transparent leading-tight">
-          Win a $50 Gift Card!
+        <h1 className="text-5xl md:text-6xl font-bold text-balance mb-6 text-foreground leading-tight">
+          Win a $20 Gift Card!
         </h1>
         <p className="text-xl text-muted-foreground text-pretty max-w-3xl mx-auto leading-relaxed">
           Help us understand consumer preferences by choosing your favorite gift card. Your
@@ -170,7 +170,7 @@ export default function ContestForm() {
               }`}
               onClick={() => handleCardSelection('sephora')}
             >
-              <div className="relative aspect-[1.586/1] bg-gradient-to-br from-black via-gray-900 to-black shadow-xl">
+              <div className="relative aspect-[1.586/1] bg-gray-900 shadow-xl">
                 <Image
                   src="/images/sephora-card.png"
                   alt="Sephora Gift Card"
@@ -195,7 +195,7 @@ export default function ContestForm() {
               }`}
               onClick={() => handleCardSelection('chipotle')}
             >
-              <div className="relative aspect-[1.586/1] bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 shadow-xl">
+              <div className="relative aspect-[1.586/1] bg-gray-100 shadow-xl">
                 <Image
                   src="/images/chipotle-card.png"
                   alt="Chipotle Gift Card"

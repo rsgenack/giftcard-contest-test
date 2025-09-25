@@ -1,50 +1,43 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Updated to vibrant multi-color palette */
+  /* Clean blue accent palette */
   --background: #ffffff;
   --foreground: #000000;
   --card: #ffffff;
   --card-foreground: #000000;
   --popover: #ffffff;
   --popover-foreground: #000000;
-  --primary: #e877b7; /* Pink */
+  --primary: #9dd7f1; /* Blue accent */
   --primary-foreground: #000000;
-  --secondary: #f77e86; /* Coral */
+  --secondary: #f1f5f9; /* Light gray */
   --secondary-foreground: #000000;
   --muted: #f8fafc;
-  --muted-foreground: #000000;
-  --accent: #f78f40; /* Orange */
+  --muted-foreground: #64748b;
+  --accent: #9dd7f1; /* Blue accent */
   --accent-foreground: #000000;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --border: #e5e7eb;
+  --border: #e2e8f0;
   --input: #f8fafc;
-  --ring: rgba(232, 119, 183, 0.5);
-  --chart-1: #e877b7; /* Pink */
-  --chart-2: #f77e86; /* Coral */
-  --chart-3: #f78f40; /* Orange */
-  --chart-4: #f4c52e; /* Yellow */
-  --chart-5: #a9d03e; /* Green */
+  --ring: rgba(157, 215, 241, 0.5);
+  --chart-1: #9dd7f1; /* Blue accent */
+  --chart-2: #64748b; /* Gray */
+  --chart-3: #1e293b; /* Dark gray */
+  --chart-4: #cbd5e1; /* Light gray */
+  --chart-5: #475569; /* Medium gray */
   --radius: 0.5rem;
   --sidebar: #ffffff;
   --sidebar-foreground: #000000;
-  --sidebar-primary: #e877b7;
+  --sidebar-primary: #9dd7f1;
   --sidebar-primary-foreground: #000000;
-  --sidebar-accent: #f77e86;
+  --sidebar-accent: #f1f5f9;
   --sidebar-accent-foreground: #000000;
-  --sidebar-border: #e5e7eb;
-  --sidebar-ring: rgba(232, 119, 183, 0.5);
-
-  /* Added custom color variables for the new palette */
-  --color-pink: #e877b7;
-  --color-coral: #f77e86;
-  --color-orange: #f78f40;
-  --color-yellow: #f4c52e;
-  --color-green: #a9d03e;
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: rgba(157, 215, 241, 0.5);
 }
 
 .dark {
@@ -54,32 +47,32 @@
   --card-foreground: #ffffff;
   --popover: #1a1a1a;
   --popover-foreground: #ffffff;
-  --primary: #e877b7;
+  --primary: #9dd7f1;
   --primary-foreground: #000000;
-  --secondary: #f77e86;
-  --secondary-foreground: #000000;
-  --muted: #2a2a2a;
-  --muted-foreground: #ffffff;
-  --accent: #f78f40;
+  --secondary: #1e293b;
+  --secondary-foreground: #ffffff;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #9dd7f1;
   --accent-foreground: #000000;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --border: #2a2a2a;
-  --input: #2a2a2a;
-  --ring: rgba(232, 119, 183, 0.5);
-  --chart-1: #e877b7;
-  --chart-2: #f77e86;
-  --chart-3: #f78f40;
-  --chart-4: #f4c52e;
-  --chart-5: #a9d03e;
+  --border: #334155;
+  --input: #1e293b;
+  --ring: rgba(157, 215, 241, 0.5);
+  --chart-1: #9dd7f1;
+  --chart-2: #64748b;
+  --chart-3: #1e293b;
+  --chart-4: #475569;
+  --chart-5: #334155;
   --sidebar: #000000;
   --sidebar-foreground: #ffffff;
-  --sidebar-primary: #e877b7;
+  --sidebar-primary: #9dd7f1;
   --sidebar-primary-foreground: #000000;
-  --sidebar-accent: #f77e86;
-  --sidebar-accent-foreground: #000000;
-  --sidebar-border: #2a2a2a;
-  --sidebar-ring: rgba(232, 119, 183, 0.5);
+  --sidebar-accent: #1e293b;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #334155;
+  --sidebar-ring: rgba(157, 215, 241, 0.5);
 }
 
 @theme inline {
@@ -131,17 +124,19 @@
   body {
     @apply bg-background text-foreground;
   }
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-heading), system-ui, sans-serif;
     text-transform: uppercase;
     letter-spacing: 0.02em;
   }
 }
 
-/* Added custom gradient backgrounds and animations */
-.hero-gradient {
-  background: linear-gradient(135deg, #ffffff 0%, rgba(232, 119, 183, 0.1) 50%, rgba(247, 126, 134, 0.1) 100%);
-}
+/* Custom animations */
 
 .card-hover-effect {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
