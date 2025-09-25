@@ -72,14 +72,12 @@ export default function ContestForm() {
           throw new Error("Failed to submit entry")
         }
 
-        // Log events to StatSig
-        statsigClient.logEvent("venmo_provided", normalizedUsername)
+        // Log events to StatSig (sanitized, no PII)
+        statsigClient.logEvent("venmo_provided", 1, { provided: true })
 
         statsigClient.logEvent("contest_entry", 1, {
-          venmo_username: normalizedUsername,
           gift_card_choice: selectedGiftCard,
-          timestamp: new Date().toISOString(),
-          user_agent: navigator.userAgent,
+          submitted: true,
         })
 
         setIsSubmitted(true)
@@ -96,9 +94,7 @@ export default function ContestForm() {
     setSelectedGiftCard(cardType)
 
     if (cardType && statsigClient) {
-      statsigClient.logEvent("card_selection", cardType, {
-        timestamp: new Date().toISOString(),
-      })
+      statsigClient.logEvent("gift_card_selected", 1, { gift_card_choice: cardType })
     }
   }
 
