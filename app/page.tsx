@@ -7,23 +7,20 @@ import { STATSIG_CLIENT_KEY } from '@/constants/apiKeys';
 import { trackGAEvent } from '@/lib/ga';
 import { createStatsigLogger } from '@/lib/statsig-debug';
 import { getStableUserID } from '@/utils/getStableUserID';
-import { StatsigProvider, useClientAsyncInit, useStatsigClient } from '@statsig/react-bindings';
-import { useEffect } from 'react';
+import { StatsigProvider, useStatsigClient } from '@statsig/react-bindings';
+import { useEffect, useMemo } from 'react';
 
 function PageWithStatsig() {
-  const { isLoading } = useClientAsyncInit(STATSIG_CLIENT_KEY, {
-    userID: getStableUserID(),
-  });
-  const statsig = useStatsigClient();
-  const statsigLogger = createStatsigLogger(statsig);
+  const { client: statsigClient, isLoading } = useStatsigClient();
+  const statsigLogger = useMemo(() => createStatsigLogger(statsigClient), [statsigClient]);
 
   useEffect(() => {
-    if (!isLoading && statsig) {
+    if (!isLoading && statsigClient) {
       const path = typeof window !== 'undefined' ? window.location.pathname : '/';
       statsigLogger.logEvent('page_loaded', 1, { path });
       trackGAEvent('page_loaded', { path });
     }
-  }, [isLoading, statsig, statsigLogger]);
+  }, [isLoading, statsigClient, statsigLogger]);
 
   if (isLoading) return null;
 
