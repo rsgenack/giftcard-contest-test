@@ -1,9 +1,7 @@
 'use client';
 
-import ConsoleCapture from '@/components/console-capture';
 import ContestForm from '@/components/contest-form';
 import { GAPageview } from '@/components/ga-pageview';
-import { YOUR_CLIENT_API_KEY } from '@/constants/apiKeys';
 import { getStableUserID } from '@/utils/getStableUserID';
 import { StatsigProvider, useClientAsyncInit, useStatsigClient } from '@statsig/react-bindings';
 import WebAnalytics from '@statsig/web-analytics';
@@ -12,6 +10,7 @@ import { useEffect, useRef } from 'react';
 function PageWithStatsig() {
   const statsig = useStatsigClient();
   const webAnalyticsInitialized = useRef(false);
+  const statsigLogPatched = useRef(false);
 
   // Use Statsig Web Analytics default page view tracking
   useEffect(() => {
@@ -28,19 +27,43 @@ function PageWithStatsig() {
     }
   }, [statsig]); // Keep statsig in deps but prevent re-initialization
 
+  // Console log every Statsig event capture
+  useEffect(() => {
+    if (!statsig || statsigLogPatched.current) return;
+    try {
+      const original = (statsig as any).logEvent?.bind(statsig);
+      if (typeof original === 'function') {
+        (statsig as any).logEvent = (
+          eventName: string,
+          value?: number | string,
+          metadata?: Record<string, any>,
+        ) => {
+          const result = original(eventName, value, metadata);
+          try {
+            console.log('[Statsig] Event captured:', { eventName, value, metadata });
+          } catch {}
+          return result;
+        };
+      }
+      statsigLogPatched.current = true;
+    } catch {}
+  }, [statsig]);
+
   return (
     <main className="p-6">
       <GAPageview />
-      <ConsoleCapture />
       <ContestForm />
     </main>
   );
 }
 
 export default function App() {
-  const { client, isLoading } = useClientAsyncInit(YOUR_CLIENT_API_KEY, {
-    userID: getStableUserID(),
-  });
+  const { client, isLoading } = useClientAsyncInit(
+    process.env.NEXT_PUBLIC_STATSIG_CLIENT_KEY as string,
+    {
+      userID: getStableUserID(),
+    },
+  );
 
   if (isLoading) return null;
 

@@ -1,36 +1,36 @@
-import { readFile } from "fs/promises"
-import { existsSync } from "fs"
-import path from "path"
+import { existsSync } from 'fs';
+import { readFile } from 'fs/promises';
+import path from 'path';
 
 interface ContestEntry {
-  id: string
-  giftCardChoice: "sephora" | "chipotle"
-  venmoUsername: string
-  timestamp: string
-  userAgent?: string
+  id: string;
+  giftCardChoice: 'sephora' | 'chipotle';
+  venmoUsername: string;
+  timestamp: string;
+  userAgent?: string;
 }
 
 async function getEntries(): Promise<ContestEntry[]> {
-  const filePath = path.join(process.cwd(), "data", "contest-entries.json")
+  const filePath = path.join(process.cwd(), 'data', 'contest-entries.json');
 
   if (!existsSync(filePath)) {
-    return []
+    return [];
   }
 
   try {
-    const data = await readFile(filePath, "utf-8")
-    return JSON.parse(data)
+    const data = await readFile(filePath, 'utf-8');
+    return JSON.parse(data);
   } catch (error) {
-    console.error("Error reading entries:", error)
-    return []
+    console.error('Error reading entries:', error);
+    return [];
   }
 }
 
 export default async function AdminPage() {
-  const entries = await getEntries()
+  const entries = await getEntries();
 
-  const sephoraCount = entries.filter((e) => e.giftCardChoice === "sephora").length
-  const chipotleCount = entries.filter((e) => e.giftCardChoice === "chipotle").length
+  const sephoraCount = entries.filter((e) => e.giftCardChoice === 'sephora').length;
+  const chipotleCount = entries.filter((e) => e.giftCardChoice === 'chipotle').length;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -44,7 +44,7 @@ export default async function AdminPage() {
         </div>
         <div className="bg-card p-6 rounded-lg border">
           <h3 className="text-lg font-semibold mb-2">Sephora Preference</h3>
-          <p className="text-3xl font-bold text-pink-600">{sephoraCount}</p>
+          <p className="text-3xl font-bold text-[#4991ff]">{sephoraCount}</p>
           <p className="text-sm text-muted-foreground">
             {entries.length > 0 ? Math.round((sephoraCount / entries.length) * 100) : 0}%
           </p>
@@ -88,15 +88,17 @@ export default async function AdminPage() {
                     <td className="p-4">
                       <span
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          entry.giftCardChoice === "sephora"
-                            ? "bg-pink-100 text-pink-800"
-                            : "bg-orange-100 text-orange-800"
+                          entry.giftCardChoice === 'sephora'
+                            ? 'bg-[#4991ff] text-white'
+                            : 'bg-orange-100 text-orange-800'
                         }`}
                       >
-                        {entry.giftCardChoice === "sephora" ? "Sephora" : "Chipotle"}
+                        {entry.giftCardChoice === 'sephora' ? 'Sephora' : 'Chipotle'}
                       </span>
                     </td>
-                    <td className="p-4 font-mono text-sm text-muted-foreground">{entry.id.slice(0, 8)}...</td>
+                    <td className="p-4 font-mono text-sm text-muted-foreground">
+                      {entry.id.slice(0, 8)}...
+                    </td>
                   </tr>
                 ))
               )}
@@ -105,5 +107,5 @@ export default async function AdminPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

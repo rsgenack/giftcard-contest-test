@@ -88,8 +88,8 @@ export default function ContestForm() {
   };
 
   const handleCardSelection = (cardType: GiftCardChoice) => {
-    // Always log the selection event, even if clicking the same card
-    if (cardType) {
+    // Only log when the user changes the selection via click
+    if (cardType && cardType !== selectedGiftCard) {
       statsigLogger.logEvent('gift_card_selected', 1, { gift_card_choice: cardType });
       trackGAEvent('gift_card_selected', { gift_card_choice: cardType });
     }
