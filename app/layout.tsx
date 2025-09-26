@@ -1,14 +1,18 @@
 import { Analytics } from '@vercel/analytics/next';
 import { GeistMono } from 'geist/font/mono';
-import { Anton, Poppins } from 'next/font/google';
 import type { Metadata } from 'next';
+import { Anton, Poppins } from 'next/font/google';
 import Script from 'next/script';
 import type React from 'react';
 import { Suspense } from 'react';
 import './globals.css';
 
 const anton = Anton({ subsets: ['latin'], weight: '400', variable: '--font-anton' });
-const poppins = Poppins({ subsets: ['latin'], weight: ['400', '500', '600'], variable: '--font-poppins' });
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  variable: '--font-poppins',
+});
 
 export const metadata: Metadata = {
   title: 'Giftcard Contest Experiment',
@@ -16,7 +20,8 @@ export const metadata: Metadata = {
   generator: 'v0.app',
   openGraph: {
     title: 'Giftcard Contest Experiment',
-    description: 'Win a $20 giftcard by filling out this 3 second form to help me with an experiment',
+    description:
+      'Win a $20 giftcard by filling out this 3 second form to help me with an experiment',
     type: 'website',
     siteName: 'Giftcard Contest Experiment',
   },

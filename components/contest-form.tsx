@@ -41,27 +41,6 @@ export default function ContestForm() {
       try {
         const normalizedUsername = normalizeVenmoUsername(venmoUsername);
 
-        const duplicateResponse = await fetch('/api/check-duplicate', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ venmoUsername: normalizedUsername }),
-        });
-
-        if (!duplicateResponse.ok) {
-          throw new Error('Failed to check for duplicates');
-        }
-
-        const duplicateData = await duplicateResponse.json();
-
-        if (duplicateData.isDuplicate) {
-          setDuplicateError(
-            'This Venmo username has already been submitted. Each person can only enter once.',
-          );
-          return;
-        }
-
         const submitResponse = await fetch('/api/submit-entry', {
           method: 'POST',
           headers: {
@@ -101,12 +80,13 @@ export default function ContestForm() {
   };
 
   const handleCardSelection = (cardType: GiftCardChoice) => {
-    setSelectedGiftCard(cardType);
-
+    // Always log the selection event, even if clicking the same card
     if (cardType) {
       statsigLogger.logEvent('gift_card_selected', 1, { gift_card_choice: cardType });
       trackGAEvent('gift_card_selected', { gift_card_choice: cardType });
     }
+
+    setSelectedGiftCard(cardType);
   };
 
   const handleVenmoChange = (e: React.ChangeEvent<HTMLInputElement>) => {

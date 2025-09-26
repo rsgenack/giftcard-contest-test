@@ -4,28 +4,29 @@ import ConsoleCapture from '@/components/console-capture';
 import ContestForm from '@/components/contest-form';
 import { GAPageview } from '@/components/ga-pageview';
 import { STATSIG_CLIENT_KEY } from '@/constants/apiKeys';
-import { trackGAEvent } from '@/lib/ga';
-import { createStatsigLogger } from '@/lib/statsig-debug';
 import { getStableUserID } from '@/utils/getStableUserID';
 import { StatsigProvider, useClientAsyncInit, useStatsigClient } from '@statsig/react-bindings';
-import { useEffect } from 'react';
+import WebAnalytics from '@statsig/web-analytics';
+import { useEffect, useRef } from 'react';
 
 function PageWithStatsig() {
-  const { isLoading } = useClientAsyncInit(STATSIG_CLIENT_KEY, {
-    userID: getStableUserID(),
-  });
   const statsig = useStatsigClient();
-  const statsigLogger = createStatsigLogger(statsig);
+  const webAnalyticsInitialized = useRef(false);
 
+  // Use Statsig Web Analytics default page view tracking
   useEffect(() => {
-    if (!isLoading && statsig) {
-      const path = typeof window !== 'undefined' ? window.location.pathname : '/';
-      statsigLogger.logEvent('page_loaded', 1, { path });
-      trackGAEvent('page_loaded', { path });
+    if (statsig && !webAnalyticsInitialized.current) {
+      try {
+        // Initialize default page view tracking once
+        // WebAnalytics is expected to expose an init method
+        // Falls back safely if not present
+        (WebAnalytics as any)?.init?.(statsig);
+      } catch (e) {
+        console.error('[Statsig Web Analytics] init failed', e);
+      }
+      webAnalyticsInitialized.current = true;
     }
-  }, [isLoading, statsig, statsigLogger]);
-
-  if (isLoading) return null;
+  }, [statsig]);
 
   return (
     <main className="p-6">
@@ -37,8 +38,14 @@ function PageWithStatsig() {
 }
 
 export default function App() {
+  const { client, isLoading } = useClientAsyncInit(STATSIG_CLIENT_KEY, {
+    userID: getStableUserID(),
+  });
+
+  if (isLoading) return null;
+
   return (
-    <StatsigProvider sdkKey={STATSIG_CLIENT_KEY} user={{ userID: getStableUserID() }}>
+    <StatsigProvider client={client}>
       <PageWithStatsig />
     </StatsigProvider>
   );
