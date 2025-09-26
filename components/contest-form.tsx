@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { createStatsigLogger } from '@/lib/statsig-debug';
-import { useStatsigClient } from '@statsig/react-bindings';
+import { useGate, useStatsigClient } from '@statsig/react-bindings';
 import { Gift, Sparkles, Trophy } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
@@ -23,7 +23,7 @@ export default function ContestForm() {
   const [duplicateError, setDuplicateError] = useState('');
   const statsigClient = useStatsigClient();
   const statsigLogger = createStatsigLogger(statsigClient);
-  const showCarousel = !!statsigClient && statsigClient.checkGate?.('gift_card_carousel') === true;
+  const { value: showCarousel } = useGate('gift_card_carousel');
   const formRef = useRef<HTMLFormElement | null>(null);
 
   useEffect(() => {
