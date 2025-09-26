@@ -41,9 +41,7 @@ export default function GiftCardCarousel({
                 card.image
                   ? 'bg-transparent'
                   : `${card.color} flex flex-col items-center justify-center text-white font-bold text-sm`
-              } cursor-pointer relative ${
-                isSelected ? 'ring-4 ring-primary shadow-2xl' : ''
-              }`}
+              } cursor-pointer relative ${isSelected ? 'ring-4 ring-primary shadow-2xl' : ''}`}
             >
               {card.image ? (
                 <>
