@@ -117,7 +117,7 @@ export default function ContestForm() {
             <div className="mt-6 p-4 bg-muted rounded-lg">
               <p className="text-sm text-muted-foreground">
                 <Sparkles className="w-4 h-4 inline mr-2" />
-                Thank you for helping with our research study!
+                Thank you for helping with my research study!
               </p>
             </div>
           </CardHeader>
