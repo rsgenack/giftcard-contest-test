@@ -18,12 +18,28 @@ export const metadata: Metadata = {
   title: 'Giftcard Contest Experiment',
   description: 'Win a $20 giftcard by filling out this 3 second form to help me with an experiment',
   generator: 'v0.app',
+  metadataBase: new URL('https://giftcardexperiment.rgnack.com'),
   openGraph: {
     title: 'Giftcard Contest Experiment',
     description:
       'Win a $20 giftcard by filling out this 3 second form to help me with an experiment',
     type: 'website',
     siteName: 'Giftcard Contest Experiment',
+    images: [
+      {
+        url: '/og.png',
+        width: 1200,
+        height: 630,
+        alt: 'Help me test my project – Enter to win a $20 gift card',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Giftcard Contest Experiment',
+    description:
+      'Win a $20 giftcard by filling out this 3 second form to help me with an experiment',
+    images: ['/og.png'],
   },
 };
 
