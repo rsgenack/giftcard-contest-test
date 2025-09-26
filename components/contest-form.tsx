@@ -52,6 +52,7 @@ export default function ContestForm() {
           gift_card_choice: selectedGiftCard,
           submitted: true,
           venmo_username: normalizedUsername,
+          gift_card_ui: showCarousel ? 'carousel' : 'two_cards',
         });
 
         setIsSubmitted(true);
@@ -67,7 +68,10 @@ export default function ContestForm() {
   const handleCardSelection = (cardType: GiftCardChoice) => {
     // Only log when the user changes the selection via click
     if (cardType && cardType !== selectedGiftCard) {
-      statsigLogger.logEvent('gift_card_selected', 1, { gift_card_choice: cardType });
+      statsigLogger.logEvent('gift_card_selected', 1, {
+        gift_card_choice: cardType,
+        gift_card_ui: showCarousel ? 'carousel' : 'two_cards',
+      });
     }
 
     setSelectedGiftCard(cardType);
