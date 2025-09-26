@@ -29,13 +29,13 @@ export const metadata: Metadata = {
       {
         url: '/og.png',
         width: 1200,
-        height: 630,
+        height: 1200,
         alt: 'Help me test my project – Enter to win a $20 gift card',
       },
     ],
   },
   twitter: {
-    card: 'summary_large_image',
+    card: 'summary',
     title: 'Giftcard Contest Experiment',
     description:
       'Win a $20 giftcard by filling out this 3 second form to help me with an experiment',
