@@ -34,7 +34,7 @@ pnpm install
 2) Set your Statsig client SDK key
 
 - Create a `.env.local` file
-- Add `NEXT_PUBLIC_STATSIG_CLIENT_KEY=your_client_key_here`
+- Add `NEXT_PUBLIC_STATSIG_CLIENT_KEY=your_client_key_here` (or `YOUR_CLIENT_API_KEY` for backwards compatibility)
 
 3) Run the dev server
 
@@ -55,7 +55,7 @@ pnpm build && pnpm start
 - Stable User ID helper: `utils/getStableUserID.ts`
   - Returns a consistent ID per browser via `localStorage`; returns `"server"` during SSR.
 - App initialization: `app/page.tsx`
-  - Wraps the app with `StatsigProvider` using `process.env.NEXT_PUBLIC_STATSIG_CLIENT_KEY` and `{ userID: getStableUserID() }`
+  - Wraps the app with `StatsigProvider` using `process.env.NEXT_PUBLIC_STATSIG_CLIENT_KEY` (or `YOUR_CLIENT_API_KEY`) and `{ userID: getStableUserID() }`
   - Dev-only console logging of events; events are flushed on page hide/visibility change
 - Event logging adjustments (PII-aware): `components/contest-form.tsx`
   - `venmo_provided` → `1` with `{ provided: true }`
