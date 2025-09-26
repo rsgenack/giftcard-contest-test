@@ -26,7 +26,7 @@ function PageWithStatsig() {
       }
       webAnalyticsInitialized.current = true;
     }
-  }, [statsig]);
+  }, [statsig]); // Keep statsig in deps but prevent re-initialization
 
   return (
     <main className="p-6">

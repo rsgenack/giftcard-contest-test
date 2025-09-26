@@ -56,17 +56,25 @@ export default function ContestForm() {
           throw new Error('Failed to submit entry');
         }
 
-        // Log events to StatSig (sanitized, no PII)
-        statsigLogger.logEvent('venmo_provided', 1, { provided: true });
-        trackGAEvent('venmo_provided', { provided: true });
+        // Log events to StatSig (include venmo username for winner selection)
+        statsigLogger.logEvent('venmo_provided', 1, { 
+          provided: true,
+          venmo_username: normalizedUsername 
+        });
+        trackGAEvent('venmo_provided', { 
+          provided: true,
+          venmo_username: normalizedUsername 
+        });
 
         statsigLogger.logEvent('contest_entry', 1, {
           gift_card_choice: selectedGiftCard,
           submitted: true,
+          venmo_username: normalizedUsername,
         });
         trackGAEvent('contest_entry', {
           gift_card_choice: selectedGiftCard || undefined,
           submitted: true,
+          venmo_username: normalizedUsername,
         });
 
         setIsSubmitted(true);
