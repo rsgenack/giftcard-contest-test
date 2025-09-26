@@ -12,6 +12,6 @@ const nextConfig = {
   env: {
     YOUR_CLIENT_API_KEY: process.env.YOUR_CLIENT_API_KEY,
   },
-}
+};
 
-export default nextConfig
+export default nextConfig;

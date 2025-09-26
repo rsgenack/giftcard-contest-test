@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { trackGAEvent } from '@/lib/ga';
 import { createStatsigLogger } from '@/lib/statsig-debug';
 import { useStatsigClient } from '@statsig/react-bindings';
 import { Gift, Sparkles, Trophy } from 'lucide-react';
@@ -41,38 +40,14 @@ export default function ContestForm() {
       try {
         const normalizedUsername = normalizeVenmoUsername(venmoUsername);
 
-        const submitResponse = await fetch('/api/submit-entry', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            giftCardChoice: selectedGiftCard,
-            venmoUsername: normalizedUsername,
-          }),
-        });
-
-        if (!submitResponse.ok) {
-          throw new Error('Failed to submit entry');
-        }
-
-        // Log events to StatSig (include venmo username for winner selection)
+        // Log events to Statsig (include venmo username for winner selection)
         statsigLogger.logEvent('venmo_provided', 1, {
-          provided: true,
-          venmo_username: normalizedUsername,
-        });
-        trackGAEvent('venmo_provided', {
           provided: true,
           venmo_username: normalizedUsername,
         });
 
         statsigLogger.logEvent('contest_entry', 1, {
           gift_card_choice: selectedGiftCard,
-          submitted: true,
-          venmo_username: normalizedUsername,
-        });
-        trackGAEvent('contest_entry', {
-          gift_card_choice: selectedGiftCard || undefined,
           submitted: true,
           venmo_username: normalizedUsername,
         });
@@ -91,7 +66,6 @@ export default function ContestForm() {
     // Only log when the user changes the selection via click
     if (cardType && cardType !== selectedGiftCard) {
       statsigLogger.logEvent('gift_card_selected', 1, { gift_card_choice: cardType });
-      trackGAEvent('gift_card_selected', { gift_card_choice: cardType });
     }
 
     setSelectedGiftCard(cardType);

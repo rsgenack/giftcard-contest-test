@@ -1,7 +1,6 @@
 'use client';
 
 import ContestForm from '@/components/contest-form';
-import { GAPageview } from '@/components/ga-pageview';
 import { getStableUserID } from '@/utils/getStableUserID';
 import { StatsigProvider, useClientAsyncInit, useStatsigClient } from '@statsig/react-bindings';
 import WebAnalytics from '@statsig/web-analytics';
@@ -51,7 +50,6 @@ function PageWithStatsig() {
 
   return (
     <main className="p-6">
-      <GAPageview />
       <ContestForm />
     </main>
   );
