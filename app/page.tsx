@@ -81,8 +81,26 @@ export default function App() {
   const userID = getStableUserID();
   const apiKey = (process.env.NEXT_PUBLIC_STATSIG_CLIENT_KEY ||
     process.env.YOUR_CLIENT_API_KEY) as string;
+
+  function getOSName(): string {
+    if (typeof navigator === 'undefined') return 'server';
+    const platform = (navigator as any).userAgentData?.platform || navigator.platform || '';
+    const ua = navigator.userAgent || '';
+    const p = platform.toLowerCase();
+    if (/iphone|ipad|ipod/.test(ua.toLowerCase())) return 'iOS';
+    if (/android/.test(ua.toLowerCase())) return 'Android';
+    if (p.includes('mac')) return 'macOS';
+    if (p.includes('win')) return 'Windows';
+    if (p.includes('linux')) return 'Linux';
+    if (p.includes('cros')) return 'ChromeOS';
+    return 'Other';
+  }
+
   const { client, isLoading } = useClientAsyncInit(apiKey, {
     userID,
+    custom: {
+      os: getOSName(),
+    },
   });
 
   if (isLoading) return null;
