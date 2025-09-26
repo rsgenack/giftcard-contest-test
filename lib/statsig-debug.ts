@@ -61,14 +61,6 @@ export function createStatsigLogger(statsigClient: any) {
 
       try {
         const result = statsigClient.logEvent(eventName, value, enrichedMetadata);
-        // Attempt to flush immediately so events are sent as they happen
-        try {
-          if (typeof (statsigClient as any).flush === 'function') {
-            (statsigClient as any).flush();
-          } else if (typeof (statsigClient as any).flushEvents === 'function') {
-            (statsigClient as any).flushEvents();
-          }
-        } catch {}
         console.log('[Statsig] Event logged successfully:', {
           eventName,
           value,

@@ -15,19 +15,17 @@ function PageWithStatsig() {
   useEffect(() => {
     if (statsig && !webAnalyticsInitialized.current) {
       try {
-        // Initialize default page view tracking once
-        // WebAnalytics is expected to expose an init method
-        // Falls back safely if not present
         (WebAnalytics as any)?.init?.(statsig);
       } catch (e) {
         console.error('[Statsig Web Analytics] init failed', e);
       }
       webAnalyticsInitialized.current = true;
     }
-  }, [statsig]); // Keep statsig in deps but prevent re-initialization
+  }, [statsig]);
 
-  // Console log every Statsig event capture
+  // Dev-only console log for every Statsig event capture
   useEffect(() => {
+    if (process.env.NODE_ENV !== 'development') return;
     if (!statsig || statsigLogPatched.current) return;
     try {
       const original = (statsig as any).logEvent?.bind(statsig);
@@ -40,17 +38,33 @@ function PageWithStatsig() {
           const result = original(eventName, value, metadata);
           try {
             console.log('[Statsig] Event captured:', { eventName, value, metadata });
-            if (typeof (statsig as any).flush === 'function') {
-              (statsig as any).flush();
-            } else if (typeof (statsig as any).flushEvents === 'function') {
-              (statsig as any).flushEvents();
-            }
           } catch {}
           return result;
         };
       }
       statsigLogPatched.current = true;
     } catch {}
+  }, [statsig]);
+
+  // Flush buffered events on page hide/visibility change
+  useEffect(() => {
+    if (!statsig) return;
+    const flush = () => {
+      try {
+        if (typeof (statsig as any).flush === 'function') {
+          (statsig as any).flush();
+        } else if (typeof (statsig as any).flushEvents === 'function') {
+          (statsig as any).flushEvents();
+        }
+      } catch {}
+    };
+    const onHidden = () => flush();
+    document.addEventListener('visibilitychange', onHidden);
+    window.addEventListener('pagehide', onHidden);
+    return () => {
+      document.removeEventListener('visibilitychange', onHidden);
+      window.removeEventListener('pagehide', onHidden);
+    };
   }, [statsig]);
 
   // Intentionally no explicit page load event
@@ -65,7 +79,9 @@ function PageWithStatsig() {
 export default function App() {
   // Compute the user ID once before initializing to avoid ID churn in Strict Mode
   const userID = getStableUserID();
-  const { client, isLoading } = useClientAsyncInit(process.env.YOUR_CLIENT_API_KEY as string, {
+  const apiKey = (process.env.NEXT_PUBLIC_STATSIG_CLIENT_KEY ||
+    process.env.YOUR_CLIENT_API_KEY) as string;
+  const { client, isLoading } = useClientAsyncInit(apiKey, {
     userID,
   });
 

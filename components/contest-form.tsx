@@ -7,10 +7,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { createStatsigLogger } from '@/lib/statsig-debug';
-import { useStatsigClient } from '@statsig/react-bindings';
+import { useGate, useStatsigClient } from '@statsig/react-bindings';
 import { Gift, Sparkles, Trophy } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import GiftCardCarousel, { type GiftCardChoice as CarouselChoice } from './gift-card-carousel';
 
 type GiftCardChoice = CarouselChoice;
@@ -23,7 +23,8 @@ export default function ContestForm() {
   const [duplicateError, setDuplicateError] = useState('');
   const statsigClient = useStatsigClient();
   const statsigLogger = createStatsigLogger(statsigClient);
-  const showCarousel = !!statsigClient && statsigClient.checkGate?.('gift_card_carousel') === true;
+  const { value: showCarousel } = useGate('gift_card_carousel');
+  const formRef = useRef<HTMLFormElement | null>(null);
 
   useEffect(() => {
     // No need to load existing submissions from localStorage
@@ -75,6 +76,14 @@ export default function ContestForm() {
     }
 
     setSelectedGiftCard(cardType);
+
+    // Smooth scroll to the entry form so users can input Venmo
+    try {
+      // Defer until after state updates/layout
+      requestAnimationFrame(() => {
+        formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    } catch {}
   };
 
   const handleVenmoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -122,7 +131,7 @@ export default function ContestForm() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-12">
+      <form ref={formRef} onSubmit={handleSubmit} className="space-y-12">
         <div className="space-y-8">
           <div className="text-center">
             <h2 className="text-3xl font-bold mb-4">Choose Your Preferred Gift Card</h2>
@@ -130,7 +139,10 @@ export default function ContestForm() {
           </div>
 
           {showCarousel ? (
-            <GiftCardCarousel selectedGiftCard={selectedGiftCard} onSelectAction={handleCardSelection} />
+            <GiftCardCarousel
+              selectedGiftCard={selectedGiftCard}
+              onSelectAction={handleCardSelection}
+            />
           ) : (
             <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
               <div
