@@ -1,7 +1,4 @@
-import { existsSync } from 'fs';
-import { mkdir, readFile, writeFile } from 'fs/promises';
 import { type NextRequest, NextResponse } from 'next/server';
-import path from 'path';
 
 interface ContestEntry {
   id: string;
@@ -24,7 +21,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Create entry object
+    // Create entry object (no persistence required)
     const entry: ContestEntry = {
       id: crypto.randomUUID(),
       giftCardChoice,
@@ -33,33 +30,17 @@ export async function POST(request: NextRequest) {
       userAgent: request.headers.get('user-agent') || undefined,
     };
 
-    // Ensure data directory exists
-    const dataDir = path.join(process.cwd(), 'data');
-    if (!existsSync(dataDir)) {
-      await mkdir(dataDir, { recursive: true });
-    }
-
-    const filePath = path.join(dataDir, 'contest-entries.json');
-
-    // Read existing entries or create empty array
-    let entries: ContestEntry[] = [];
-    try {
-      const existingData = await readFile(filePath, 'utf-8');
-      entries = JSON.parse(existingData);
-    } catch (error) {
-      // File doesn't exist yet, start with empty array
-      entries = [];
-    }
-
-    // Add new entry
-    entries.push(entry);
-
-    // Write back to file
-    await writeFile(filePath, JSON.stringify(entries, null, 2));
+    // Optionally log receipt on the server for debugging
+    console.log('[submit-entry] received', {
+      id: entry.id,
+      giftCardChoice: entry.giftCardChoice,
+      venmoUsername: entry.venmoUsername,
+      timestamp: entry.timestamp,
+    });
 
     return NextResponse.json({ success: true, entryId: entry.id });
   } catch (error) {
-    console.error('Error saving entry:', error);
-    return NextResponse.json({ error: 'Failed to save entry' }, { status: 500 });
+    console.error('Error handling submit entry:', error);
+    return NextResponse.json({ error: 'Failed to handle entry' }, { status: 500 });
   }
 }
