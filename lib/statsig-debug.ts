@@ -34,7 +34,11 @@ export function createStatsigLogger(statsigClient: any) {
       const shouldLimitMetadata = eventName === 'venmo_provided';
       const eventMetadata = getEventMetadata();
       const enrichedMetadata = shouldLimitMetadata
-        ? { venmo_username: metadata?.venmo_username }
+        ? {
+            venmo_username: metadata?.venmo_username,
+            gift_card_choice: (metadata as any)?.gift_card_choice,
+            gift_card_ui: (metadata as any)?.gift_card_ui,
+          }
         : {
             ...metadata,
             ...eventMetadata,

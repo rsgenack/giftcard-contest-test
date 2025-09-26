@@ -47,6 +47,8 @@ export default function ContestForm() {
         statsigLogger.logEvent('venmo_provided', 1, {
           provided: true,
           venmo_username: normalizedUsername,
+          gift_card_choice: selectedGiftCard,
+          gift_card_ui: showCarousel ? 'carousel' : 'two_cards',
         });
 
         statsigLogger.logEvent('contest_entry', 1, {
