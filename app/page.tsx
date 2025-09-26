@@ -73,8 +73,10 @@ function PageWithStatsig() {
 }
 
 export default function App() {
+  // Compute the user ID once before initializing to avoid ID churn in Strict Mode
+  const userID = getStableUserID();
   const { client, isLoading } = useClientAsyncInit(process.env.YOUR_CLIENT_API_KEY as string, {
-    userID: getStableUserID(),
+    userID,
   });
 
   if (isLoading) return null;
