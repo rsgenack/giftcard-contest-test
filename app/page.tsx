@@ -58,12 +58,9 @@ function PageWithStatsig() {
 }
 
 export default function App() {
-  const { client, isLoading } = useClientAsyncInit(
-    process.env.NEXT_PUBLIC_STATSIG_CLIENT_KEY as string,
-    {
-      userID: getStableUserID(),
-    },
-  );
+  const { client, isLoading } = useClientAsyncInit(process.env.YOUR_CLIENT_API_KEY as string, {
+    userID: getStableUserID(),
+  });
 
   if (isLoading) return null;
 
