@@ -191,3 +191,88 @@
 .bg-green-custom {
   background-color: #a9d03e;
 }
+
+/* 3D carousel styles (for Statsig-gated gift card carousel) */
+@keyframes autoRun3d {
+  from {
+    transform: perspective(800px) rotateY(-360deg);
+  }
+  to {
+    transform: perspective(800px) rotateY(0deg);
+  }
+}
+
+.card-3d {
+  position: relative;
+  width: 800px;
+  height: 400px;
+  transform-style: preserve-3d;
+  transform: perspective(1200px);
+  animation: autoRun3d 40s linear infinite;
+  will-change: transform;
+  margin: 0 auto;
+}
+
+.card-3d:hover {
+  animation-play-state: paused !important;
+}
+.card-3d:hover .card-item {
+  animation-play-state: paused !important;
+}
+
+.card-3d .card-item {
+  position: absolute;
+  width: 210px;
+  height: 133px;
+  border-radius: 0.5rem;
+  top: 50%;
+  left: 50%;
+  transform-origin: center center;
+  transition-duration: 200ms;
+  will-change: transform, filter;
+  overflow: hidden;
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 0.1),
+    0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.card-3d .card-item:nth-child(1) {
+  transform: translate(-50%, -50%) rotateY(0deg) translateZ(350px);
+  animation: brightnessPosition0 40s linear infinite;
+}
+.card-3d .card-item:nth-child(2) {
+  transform: translate(-50%, -50%) rotateY(36deg) translateZ(350px);
+  animation: brightnessPosition1 40s linear infinite;
+}
+.card-3d .card-item:nth-child(3) {
+  transform: translate(-50%, -50%) rotateY(72deg) translateZ(350px);
+  animation: brightnessPosition2 40s linear infinite;
+}
+.card-3d .card-item:nth-child(4) {
+  transform: translate(-50%, -50%) rotateY(108deg) translateZ(350px);
+  animation: brightnessPosition3 40s linear infinite;
+}
+.card-3d .card-item:nth-child(5) {
+  transform: translate(-50%, -50%) rotateY(144deg) translateZ(350px);
+  animation: brightnessPosition4 40s linear infinite;
+}
+.card-3d .card-item:nth-child(6) {
+  transform: translate(-50%, -50%) rotateY(180deg) translateZ(350px);
+  animation: brightnessPosition5 40s linear infinite;
+}
+.card-3d .card-item:nth-child(7) {
+  transform: translate(-50%, -50%) rotateY(216deg) translateZ(350px);
+  animation: brightnessPosition6 40s linear infinite;
+}
+.card-3d .card-item:nth-child(8) {
+  transform: translate(-50%, -50%) rotateY(252deg) translateZ(350px);
+  animation: brightnessPosition7 40s linear infinite;
+}
+.card-3d .card-item:nth-child(9) {
+  transform: translate(-50%, -50%) rotateY(288deg) translateZ(350px);
+  animation: brightnessPosition8 40s linear infinite;
+}
+.card-3d .card-item:nth-child(10) {
+  transform: translate(-50%, -50%) rotateY(324deg) translateZ(350px);
+  animation: brightnessPosition9 40s linear infinite;
+}

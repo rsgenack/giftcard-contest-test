@@ -1,49 +1,55 @@
 'use client';
 
-import Image from 'next/image';
-
 export type GiftCardChoice = string | null;
 
-type GiftCardItem = {
-  id: string;
-  imageSrc: string;
-  alt: string;
-  bgClassName?: string;
-};
+const giftCards: Array<{ name: string; image?: string; color?: string; logo?: string }> = [
+  { name: 'Sephora', image: '/sephora-gift-card.png' },
+  { name: 'PlayStation', color: 'bg-blue-600', logo: '🎮' },
+  { name: 'Chipotle', image: '/chipotle-gift-card.png' },
+  { name: 'Gap', image: '/gap-gift-card-new.png' },
+  { name: 'Lyft', image: '/lyft-gift-card-new.png' },
+  { name: 'DoorDash', image: '/doordash-gift-card-artistic.png' },
+  { name: 'Home Depot', image: '/home-depot-gift-card.png' },
+  { name: 'Amazon', image: '/amazon-gift-card-new.png' },
+  { name: 'Starbucks', image: '/starbucks-gift-card.png' },
+  { name: 'Lululemon', image: '/lululemon-gift-card-new.png' },
+];
 
 export default function GiftCardCarousel({
   selectedGiftCard,
   onSelectAction,
-  items,
 }: {
   selectedGiftCard: GiftCardChoice;
   onSelectAction: (choice: GiftCardChoice) => void;
-  items?: GiftCardItem[];
 }) {
-  const cards: GiftCardItem[] =
-    items && items.length > 0
-      ? items
-      : [
-          { id: 'sephora', imageSrc: '/images/sephora-card.png', alt: 'Sephora Gift Card', bgClassName: 'bg-black' },
-          { id: 'chipotle', imageSrc: '/images/chipotle-card.png', alt: 'Chipotle Gift Card', bgClassName: 'bg-gray-100' },
-        ];
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-4 px-1">
-        {cards.map((card) => (
-          <button
-            key={card.id}
-            type="button"
-            onClick={() => onSelectAction(card.id)}
-            className={`min-w-[320px] snap-center rounded-lg overflow-hidden shadow-lg transition-all ${
-              selectedGiftCard === card.id ? 'ring-4 ring-[#4991ff] shadow-2xl' : 'hover:shadow-xl'
-            }`}
-            aria-pressed={selectedGiftCard === card.id}
+    <div className="relative flex items-center justify-center">
+      <div className="card-3d">
+        {giftCards.map((card) => (
+          <div
+            key={card.name}
+            onClick={() => onSelectAction(card.name.toLowerCase())}
+            className={`card-item ${
+              card.image
+                ? 'bg-transparent'
+                : `${card.color} flex flex-col items-center justify-center text-white font-bold text-sm`
+            } cursor-pointer`}
           >
-            <div className={`relative aspect-[1.586/1] ${card.bgClassName || 'bg-white'}`}>
-              <Image src={card.imageSrc} alt={card.alt} fill className="object-cover object-center" priority />
-            </div>
-          </button>
+            {card.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={card.image || '/placeholder.svg'}
+                alt={`${card.name} gift card`}
+                className="w-full h-full object-cover rounded-lg"
+                draggable={false}
+              />
+            ) : (
+              <>
+                <div className="text-4xl mb-2">{card.logo}</div>
+                <div className="text-center px-2">{card.name}</div>
+              </>
+            )}
+          </div>
         ))}
       </div>
     </div>
