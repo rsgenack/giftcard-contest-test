@@ -111,7 +111,7 @@ export default function ContestForm() {
             </div>
             <CardTitle className="text-3xl text-balance text-primary">🎉 You're In! 🎉</CardTitle>
             <CardDescription className="text-lg mt-4 text-card-foreground">
-              Your entry has been submitted successfully! We'll contact you via Venmo if you're our
+              Your entry has been submitted successfully! I'll contact you via Venmo if you're my
               lucky winner.
             </CardDescription>
             <div className="mt-6 p-4 bg-muted rounded-lg">
@@ -228,7 +228,7 @@ export default function ContestForm() {
                   className="h-12 text-base"
                 />
                 <p className="text-sm text-muted-foreground">
-                  We'll use this to send your prize if you win!
+                  I'll use this to send your prize if you win!
                 </p>
                 {duplicateError && (
                   <p className="text-sm text-destructive bg-destructive/10 p-3 rounded-md border border-destructive/20">
@@ -256,14 +256,11 @@ export default function ContestForm() {
             </p>
           </div>
           <div className="space-y-2 text-sm text-muted-foreground">
+            <p>By submitting your entry, you are entering to win a gift card of your choice.</p>
+            <p>All data will be deleted within 48 hours of collection.</p>
             <p>
-              By submitting your entry, you are entering to win a gift card of your choice.
-            </p>
-            <p>
-              All data will be deleted within 48 hours of collection.
-            </p>
-            <p>
-              If you win, you will receive your gift card via Venmo from <span className="font-medium text-foreground">@rebecca-genack</span>.
+              If you win, you will receive your gift card via Venmo from{' '}
+              <span className="font-medium text-foreground">@rebecca-genack</span>.
             </p>
           </div>
           <div className="mt-4 pt-4 border-t border-border/50">
