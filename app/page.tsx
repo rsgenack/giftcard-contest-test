@@ -10,7 +10,6 @@ function PageWithStatsig() {
   const statsig = useStatsigClient();
   const webAnalyticsInitialized = useRef(false);
   const statsigLogPatched = useRef(false);
-  const pageLoadLogged = useRef(false);
 
   // Use Statsig Web Analytics default page view tracking
   useEffect(() => {
@@ -54,16 +53,7 @@ function PageWithStatsig() {
     } catch {}
   }, [statsig]);
 
-  // Explicitly log a one-time page load event
-  useEffect(() => {
-    if (!statsig || pageLoadLogged.current) return;
-    try {
-      const path =
-        typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/';
-      (statsig as any)?.logEvent?.('page_loaded', 1, { path });
-      pageLoadLogged.current = true;
-    } catch {}
-  }, [statsig]);
+  // Intentionally no explicit page load event
 
   return (
     <main className="p-6">

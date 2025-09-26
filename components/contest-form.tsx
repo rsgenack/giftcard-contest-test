@@ -11,9 +11,9 @@ import { useStatsigClient } from '@statsig/react-bindings';
 import { Gift, Sparkles, Trophy } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import GiftCardCarousel from './gift-card-carousel';
+import GiftCardCarousel, { type GiftCardChoice as CarouselChoice } from './gift-card-carousel';
 
-type GiftCardChoice = 'sephora' | 'chipotle' | null;
+type GiftCardChoice = CarouselChoice;
 
 export default function ContestForm() {
   const [selectedGiftCard, setSelectedGiftCard] = useState<GiftCardChoice>(null);
@@ -130,7 +130,7 @@ export default function ContestForm() {
           </div>
 
           {showCarousel ? (
-            <GiftCardCarousel selectedGiftCard={selectedGiftCard} onSelect={handleCardSelection} />
+            <GiftCardCarousel selectedGiftCard={selectedGiftCard} onSelectAction={handleCardSelection} />
           ) : (
             <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
               <div

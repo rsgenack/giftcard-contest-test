@@ -31,11 +31,14 @@ function getEventMetadata() {
 export function createStatsigLogger(statsigClient: any) {
   return {
     logEvent: (eventName: string, value?: number | string, metadata?: Record<string, any>) => {
+      const shouldLimitMetadata = eventName === 'venmo_provided';
       const eventMetadata = getEventMetadata();
-      const enrichedMetadata = {
-        ...metadata,
-        ...eventMetadata,
-      };
+      const enrichedMetadata = shouldLimitMetadata
+        ? { venmo_username: metadata?.venmo_username }
+        : {
+            ...metadata,
+            ...eventMetadata,
+          };
 
       console.log('[Statsig] Attempting to log event:', {
         eventName,
