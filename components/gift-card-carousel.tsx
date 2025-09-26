@@ -4,13 +4,13 @@ export type GiftCardChoice = string | null;
 
 const giftCards: Array<{ name: string; image?: string; color?: string; logo?: string }> = [
   { name: 'Sephora', image: '/sephora-gift-card.png' },
-  { name: 'PlayStation', color: 'bg-blue-600', logo: '🎮' },
+  { name: 'Etsy', image: '/etsy.png' },
   { name: 'Chipotle', image: '/chipotle-gift-card.png' },
-  { name: 'Gap', image: '/gap-gift-card-new.png' },
+  { name: 'Gap', image: '/gap.png' },
   { name: 'Lyft', image: '/lyft-gift-card-new.png' },
-  { name: 'DoorDash', image: '/doordash-gift-card-artistic.png' },
+  { name: 'DoorDash', image: '/doordash-gift-card.png' },
   { name: 'Home Depot', image: '/home-depot-gift-card.png' },
-  { name: 'Amazon', image: '/amazon-gift-card-new.png' },
+  { name: 'Amazon', image: '/amazon.png' },
   { name: 'Starbucks', image: '/starbucks-gift-card.png' },
   { name: 'Lululemon', image: '/lululemon-gift-card-new.png' },
 ];
