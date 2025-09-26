@@ -11,6 +11,7 @@ import { useStatsigClient } from '@statsig/react-bindings';
 import { Gift, Sparkles, Trophy } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import GiftCardCarousel from './gift-card-carousel';
 
 type GiftCardChoice = 'sephora' | 'chipotle' | null;
 
@@ -22,6 +23,7 @@ export default function ContestForm() {
   const [duplicateError, setDuplicateError] = useState('');
   const statsigClient = useStatsigClient();
   const statsigLogger = createStatsigLogger(statsigClient);
+  const showCarousel = !!statsigClient && statsigClient.checkGate?.('gift_card_carousel') === true;
 
   useEffect(() => {
     // No need to load existing submissions from localStorage
@@ -123,57 +125,61 @@ export default function ContestForm() {
             <p className="text-muted-foreground">Select the gift card you'd prefer to win</p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            <div
-              className={`cursor-pointer card-hover-effect overflow-hidden rounded-lg transition-all duration-300 ${
-                selectedGiftCard === 'sephora'
-                  ? 'ring-4 ring-primary shadow-2xl pulse-glow'
-                  : 'hover:shadow-xl shadow-lg'
-              }`}
-              onClick={() => handleCardSelection('sephora')}
-            >
-              <div className="relative aspect-[1.586/1] bg-gray-900 shadow-xl">
-                <Image
-                  src="/images/sephora-card.png"
-                  alt="Sephora Gift Card"
-                  fill
-                  className="object-cover object-center scale-110"
-                />
-                {selectedGiftCard === 'sephora' && (
-                  <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
-                    <div className="bg-white/95 text-primary px-6 py-3 rounded-full font-bold text-lg shadow-lg">
-                      ✓ SELECTED
+          {showCarousel ? (
+            <GiftCardCarousel selectedGiftCard={selectedGiftCard} onSelect={handleCardSelection} />
+          ) : (
+            <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+              <div
+                className={`cursor-pointer card-hover-effect overflow-hidden rounded-lg transition-all duration-300 ${
+                  selectedGiftCard === 'sephora'
+                    ? 'ring-4 ring-primary shadow-2xl pulse-glow'
+                    : 'hover:shadow-xl shadow-lg'
+                }`}
+                onClick={() => handleCardSelection('sephora')}
+              >
+                <div className="relative aspect-[1.586/1] bg-gray-900 shadow-xl">
+                  <Image
+                    src="/images/sephora-card.png"
+                    alt="Sephora Gift Card"
+                    fill
+                    className="object-cover object-center scale-110"
+                  />
+                  {selectedGiftCard === 'sephora' && (
+                    <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                      <div className="bg-white/95 text-primary px-6 py-3 rounded-full font-bold text-lg shadow-lg">
+                        ✓ SELECTED
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
 
-            <div
-              className={`cursor-pointer card-hover-effect overflow-hidden rounded-lg transition-all duration-300 ${
-                selectedGiftCard === 'chipotle'
-                  ? 'ring-4 ring-primary shadow-2xl pulse-glow'
-                  : 'hover:shadow-xl shadow-lg'
-              }`}
-              onClick={() => handleCardSelection('chipotle')}
-            >
-              <div className="relative aspect-[1.586/1] bg-gray-100 shadow-xl">
-                <Image
-                  src="/images/chipotle-card.png"
-                  alt="Chipotle Gift Card"
-                  fill
-                  className="object-cover object-center scale-110"
-                />
-                {selectedGiftCard === 'chipotle' && (
-                  <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
-                    <div className="bg-white/95 text-primary px-6 py-3 rounded-full font-bold text-lg shadow-lg">
-                      ✓ SELECTED
+              <div
+                className={`cursor-pointer card-hover-effect overflow-hidden rounded-lg transition-all duration-300 ${
+                  selectedGiftCard === 'chipotle'
+                    ? 'ring-4 ring-primary shadow-2xl pulse-glow'
+                    : 'hover:shadow-xl shadow-lg'
+                }`}
+                onClick={() => handleCardSelection('chipotle')}
+              >
+                <div className="relative aspect-[1.586/1] bg-gray-100 shadow-xl">
+                  <Image
+                    src="/images/chipotle-card.png"
+                    alt="Chipotle Gift Card"
+                    fill
+                    className="object-cover object-center scale-110"
+                  />
+                  {selectedGiftCard === 'chipotle' && (
+                    <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                      <div className="bg-white/95 text-primary px-6 py-3 rounded-full font-bold text-lg shadow-lg">
+                        ✓ SELECTED
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {selectedGiftCard && (
