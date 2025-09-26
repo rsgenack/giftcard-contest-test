@@ -1,3 +1,5 @@
+let sessionId: string | null = null;
+
 function getEventMetadata() {
   if (typeof window === 'undefined') {
     return {
@@ -6,9 +8,19 @@ function getEventMetadata() {
     };
   }
 
+  if (!sessionId) {
+    try {
+      sessionId =
+        (globalThis.crypto as any)?.randomUUID?.() ?? Math.random().toString(36).slice(2, 10);
+    } catch {
+      sessionId = Math.random().toString(36).slice(2, 10);
+    }
+  }
+
   return {
     timestamp: new Date().toISOString(),
     environment: 'client',
+    session_id: sessionId,
     url: window.location.href,
     pathname: window.location.pathname,
     search: window.location.search,
