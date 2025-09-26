@@ -10,6 +10,7 @@ function PageWithStatsig() {
   const statsig = useStatsigClient();
   const webAnalyticsInitialized = useRef(false);
   const statsigLogPatched = useRef(false);
+  const pageLoadLogged = useRef(false);
 
   // Use Statsig Web Analytics default page view tracking
   useEffect(() => {
@@ -40,11 +41,27 @@ function PageWithStatsig() {
           const result = original(eventName, value, metadata);
           try {
             console.log('[Statsig] Event captured:', { eventName, value, metadata });
+            if (typeof (statsig as any).flush === 'function') {
+              (statsig as any).flush();
+            } else if (typeof (statsig as any).flushEvents === 'function') {
+              (statsig as any).flushEvents();
+            }
           } catch {}
           return result;
         };
       }
       statsigLogPatched.current = true;
+    } catch {}
+  }, [statsig]);
+
+  // Explicitly log a one-time page load event
+  useEffect(() => {
+    if (!statsig || pageLoadLogged.current) return;
+    try {
+      const path =
+        typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/';
+      (statsig as any)?.logEvent?.('page_loaded', 1, { path });
+      pageLoadLogged.current = true;
     } catch {}
   }, [statsig]);
 
