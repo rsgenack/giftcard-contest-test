@@ -8,7 +8,7 @@ import { trackGAEvent } from '@/lib/ga';
 import { createStatsigLogger } from '@/lib/statsig-debug';
 import { getStableUserID } from '@/utils/getStableUserID';
 import { StatsigProvider, useStatsigClient } from '@statsig/react-bindings';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 function PageWithStatsig() {
   const { client: statsigClient, isLoading } = useStatsigClient();
@@ -34,8 +34,32 @@ function PageWithStatsig() {
 }
 
 export default function App() {
+  const [statsigUser, setStatsigUser] = useState(() => {
+    if (typeof window === 'undefined') {
+      return { userID: 'server' };
+    }
+
+    return { userID: getStableUserID() };
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const stableUserID = getStableUserID();
+
+    setStatsigUser((previousUser) => {
+      if (previousUser.userID === stableUserID) {
+        return previousUser;
+      }
+
+      return { userID: stableUserID };
+    });
+  }, []);
+
   return (
-    <StatsigProvider sdkKey={STATSIG_CLIENT_KEY} user={{ userID: getStableUserID() }}>
+    <StatsigProvider sdkKey={STATSIG_CLIENT_KEY} user={statsigUser}>
       <PageWithStatsig />
     </StatsigProvider>
   );
