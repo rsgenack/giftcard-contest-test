@@ -3,7 +3,7 @@
 import ConsoleCapture from '@/components/console-capture';
 import ContestForm from '@/components/contest-form';
 import { GAPageview } from '@/components/ga-pageview';
-import { STATSIG_CLIENT_KEY } from '@/constants/apiKeys';
+import { YOUR_CLIENT_API_KEY } from '@/constants/apiKeys';
 import { getStableUserID } from '@/utils/getStableUserID';
 import { StatsigProvider, useClientAsyncInit, useStatsigClient } from '@statsig/react-bindings';
 import WebAnalytics from '@statsig/web-analytics';
@@ -38,7 +38,7 @@ function PageWithStatsig() {
 }
 
 export default function App() {
-  const { client, isLoading } = useClientAsyncInit(STATSIG_CLIENT_KEY, {
+  const { client, isLoading } = useClientAsyncInit(YOUR_CLIENT_API_KEY, {
     userID: getStableUserID(),
   });
 
