@@ -9,6 +9,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  env: {
+    YOUR_CLIENT_API_KEY: process.env.YOUR_CLIENT_API_KEY,
+  },
 }
 
 export default nextConfig
