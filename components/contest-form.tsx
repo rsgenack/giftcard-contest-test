@@ -57,13 +57,13 @@ export default function ContestForm() {
         }
 
         // Log events to StatSig (include venmo username for winner selection)
-        statsigLogger.logEvent('venmo_provided', 1, { 
+        statsigLogger.logEvent('venmo_provided', 1, {
           provided: true,
-          venmo_username: normalizedUsername 
+          venmo_username: normalizedUsername,
         });
-        trackGAEvent('venmo_provided', { 
+        trackGAEvent('venmo_provided', {
           provided: true,
-          venmo_username: normalizedUsername 
+          venmo_username: normalizedUsername,
         });
 
         statsigLogger.logEvent('contest_entry', 1, {
@@ -250,14 +250,27 @@ export default function ContestForm() {
 
       <footer className="mt-20 text-center space-y-4">
         <div className="max-w-2xl mx-auto p-6 bg-muted/50 rounded-xl border border-border/50">
-          <p className="text-sm text-muted-foreground mb-2">
-            🔒 This contest is for academic research purposes. Your data will be kept confidential
-            and used only for research.
-          </p>
-          <p className="text-sm text-muted-foreground">
-            By participating, you agree to our terms. Winner will be selected randomly and notified
-            within 48 hours.
-          </p>
+          <div className="mb-4">
+            <p className="text-sm font-medium text-foreground mb-2">
+              🧪 This is an experimental page that uses cookies for research purposes.
+            </p>
+          </div>
+          <div className="space-y-2 text-sm text-muted-foreground">
+            <p>
+              By submitting your entry, you are entering to win a gift card of your choice.
+            </p>
+            <p>
+              All data will be deleted within 48 hours of collection.
+            </p>
+            <p>
+              If you win, you will receive your gift card via Venmo from <span className="font-medium text-foreground">@rebecca-genack</span>.
+            </p>
+          </div>
+          <div className="mt-4 pt-4 border-t border-border/50">
+            <p className="text-xs text-muted-foreground">
+              Winner will be selected randomly and notified within 48 hours.
+            </p>
+          </div>
         </div>
       </footer>
     </div>
